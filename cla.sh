@@ -31,7 +31,7 @@ date: "$date"
 user: "$username"
 ---
 
-I, the undersigned, hereby confirm that I have read and agreed to the terms of the [Contributor License Agreement v1.0](../cla.md).
+I, the undersigned, hereby confirm that I have read and agreed to the terms of the [Contributor License Agreement v1.0](../docs/cla.md).
 
 *${name}*
 EOF
