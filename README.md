@@ -4,7 +4,7 @@
 
 # Contributing
 
-We do not expect any contributions at the moment, but if you’re interested, take a look at [contributing.md](./contributing.md).
+We do not expect any contributions at the moment, but if you’re interested, take a look at [contributing.md](./docs/contributing.md).
 
 # License
 
