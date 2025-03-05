@@ -53,8 +53,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq '.comments[] | select(.body | contains("Thank you for contributing! It looks like you haven'\''t signed the CLA yet."))')
           COMMENT="Thank you for contributing! It looks like you haven't signed the CLA yet. Please read [docs/contributing.md](https://github.com/${{ github.repository }}/blob/main/contributing.md) for further instructions."
-          gh pr comment $PR_NUMBER --body "$COMMENT"
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq ".comments[] | select(.body | contains(\"$COMMENT\"))")
+          if [ -z "$EXISTING_COMMENT" ]; then
+            gh pr comment $PR_NUMBER --body "$COMMENT"
+          fi
       
       - name: Comment if signature is invalid
         if: env.CLA_VALID == 'false'
@@ -63,7 +67,10 @@ jobs:
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           COMMENT="Thank you for contributing! It looks like your CLA signature is improperly formatted. Please follow the instructions in [docs/contributing.md](https://github.com/${{ github.repository }}/blob/main/contributing.md) exactly."
-          gh pr comment $PR_NUMBER --body "$COMMENT"
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq ".comments[] | select(.body | contains(\"$COMMENT\"))")
+          if [ -z "$EXISTING_COMMENT" ]; then
+            gh pr comment $PR_NUMBER --body "$COMMENT"
+          fi
       
       - name: Fail the check if CLA is missing
         if: env.CLA_SIGNED == 'false' || env.CLA_VALID == 'false'
