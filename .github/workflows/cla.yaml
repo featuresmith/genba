@@ -92,7 +92,7 @@ jobs:
     permissions:
       contents: write
     needs: check-cla
-    if: success()
+    if: needs.check-cla.outputs.CLA_SIGNED == 'true' && needs.check-cla.outputs.CLA_VALID != 'false'
     steps:
       - uses: alexwilson/enable-github-automerge-action@main
         with:
