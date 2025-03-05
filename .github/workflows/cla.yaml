@@ -76,3 +76,21 @@ jobs:
         run: |
           echo "Contributor has not signed the CLA or their signature is invalid."
           exit 1
+
+      - name: Enable auto-merge for contributors with a valid CLA
+        uses: alexwilson/enable-github-automerge-action@main
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          merge-method: "SQUASH"
+  
+  enable-auto-merge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs: check-cla
+    if: needs.check-cla.outputs.CLA_VALID == 'true'
+    steps:
+      - uses: alexwilson/enable-github-automerge-action@main
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          merge-method: "SQUASH"

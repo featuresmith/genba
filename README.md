@@ -1,6 +1,6 @@
 # Genba
 
-*where the work is done*
+This project is an experiment in development velocity.
 
 # Contributing
 
