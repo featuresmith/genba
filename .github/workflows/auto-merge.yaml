@@ -1,5 +1,12 @@
 name: Merge when ready
-on: pull_request_target
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+permissions:
+  pull-requests: read
+  contents: write
 
 jobs:
   enable-auto-merge:
