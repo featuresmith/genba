@@ -92,8 +92,14 @@ jobs:
     permissions:
       contents: write
     needs: check-cla
-    if: needs.check-cla.outputs.CLA_SIGNED == 'true' && needs.check-cla.outputs.CLA_VALID != 'false'
     steps:
+      - name: Detect merge queue
+        run: |
+          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            echo "This PR is already part of a merge group."
+            exit 0
+          fi
+      
       - uses: alexwilson/enable-github-automerge-action@main
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
