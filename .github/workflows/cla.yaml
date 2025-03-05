@@ -6,9 +6,6 @@ on:
       - synchronize
       - reopened
       - edited
-  merge_group:
-    types:
-      - checks_requested
 jobs:
   check-cla:
     runs-on: ubuntu-latest
