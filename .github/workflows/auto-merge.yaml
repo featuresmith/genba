@@ -1,9 +1,9 @@
 name: Merge when ready
 on:
-  pull_request_target:
+  workflow_run:
+    workflows: [ "Check CLA" ]
     types:
-      - opened
-      - reopened
+      - completed
 permissions:
   pull-requests: read
   contents: write
