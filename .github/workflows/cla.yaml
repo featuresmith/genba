@@ -1,0 +1,31 @@
+name: Check CLA
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+jobs:
+  check-cla:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+      - name: Get contributor's username
+        id: pr-author
+        run: echo "AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+      - name: Check if contributor has signed the CLA
+        run: |
+          if [ ! -f "contributors/${AUTHOR}.md" ]; then
+            echo "CLA_SIGNED=false" >> $GITHUB_ENV
+          else
+            echo "CLA_SIGNED=true" >> $GITHUB_ENV
+          fi
+      - name: Comment with instructions to sign the CLA
+        if: env.CLA_SIGNED == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          COMMENT="Thank you for contributing! It looks like you haven't signed the CLA yet. Please read [docs/contributing.md](https://github.com/${{ github.repository }}/blob/main/contributing.md) for further instructions."
+          gh pr comment $PR_NUMBER --body "$COMMENT"
