@@ -86,7 +86,6 @@ jobs:
   enable-auto-merge:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
       contents: write
     needs: check-cla
     if: needs.check-cla.outputs.CLA_VALID == 'true'
