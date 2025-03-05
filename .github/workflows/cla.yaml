@@ -6,12 +6,22 @@ on:
       - synchronize
       - reopened
       - edited
+  merge_group:
+    types:
+      - checks_requested
 jobs:
   check-cla:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
+      - name: Detect merge queue
+        run: |
+          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
+            echo "This PR is part of a merge group. Skipping CLA check."
+            exit 0
+          fi
+      
       - name: Checkout repository
         uses: actions/checkout@v4.2.2
       
