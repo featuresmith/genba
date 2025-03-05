@@ -1,0 +1,79 @@
+name: Check CLA
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+
+jobs:
+  check-cla:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+      
+      - name: Get contributor's username
+        id: pr-author
+        run: echo "AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+      
+      - name: Check if contributor has signed the CLA
+        run: |
+          if [ ! -f "contributors/${AUTHOR}.md" ]; then
+            echo "CLA_SIGNED=false" >> $GITHUB_ENV
+          else
+            echo "CLA_SIGNED=true" >> $GITHUB_ENV
+          fi
+      
+      - name: Validate CLA signature format
+        if: env.CLA_SIGNED == 'true'
+        id: validate-cla
+        run: |
+          SIGNATURE="contributors/${AUTHOR}.md"
+          DATE_LINE=$(grep -oP '(?<=date: ").*(?=")' "$SIGNATURE" || echo "")
+          FULLNAME=$(grep -oP '\*.+\*' "$SIGNATURE" | sed 's/\*//g' | tr -d '[:space:]')
+          CURRENT_DATE=$(date +%Y-%m-%d)
+          EXPECTED_USER="user: \"$AUTHOR\""
+          EXPECTED_CLA_STATEMENT="I, the undersigned, hereby confirm that I have read and agreed to the terms of the \[Contributor License Agreement v1.0\](../docs/cla.md)."
+          
+          if [ -z "$DATE_LINE" ] || ! grep -q "$EXPECTED_USER" "$SIGNATURE" || ! grep -q "$EXPECTED_CLA_STATEMENT" "$SIGNATURE" || [ -z "$FULLNAME" ]; then
+            echo "CLA_VALID=false" >> $GITHUB_ENV
+          elif [ "$(date -d "$DATE_LINE" +%Y-%m-%d 2>/dev/null)" \> "$CURRENT_DATE" ]; then
+            echo "CLA_VALID=false" >> $GITHUB_ENV
+          else
+            echo "CLA_VALID=true" >> $GITHUB_ENV
+          fi
+      
+      - name: Comment with instructions to sign the CLA
+        if: env.CLA_SIGNED == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq '.comments[] | select(.body | contains("Thank you for contributing! It looks like you haven'\''t signed the CLA yet."))')
+          COMMENT="Thank you for contributing! It looks like you haven't signed the CLA yet. Please read [docs/contributing.md](https://github.com/${{ github.repository }}/blob/main/contributing.md) for further instructions."
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq ".comments[] | select(.body | contains(\"$COMMENT\"))")
+          if [ -z "$EXISTING_COMMENT" ]; then
+            gh pr comment $PR_NUMBER --body "$COMMENT"
+          fi
+      
+      - name: Comment if signature is invalid
+        if: env.CLA_VALID == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          COMMENT="Thank you for contributing! It looks like your CLA signature is improperly formatted. Please follow the instructions in [docs/contributing.md](https://github.com/${{ github.repository }}/blob/main/contributing.md) exactly."
+          EXISTING_COMMENT=$(gh pr view $PR_NUMBER --json comments --jq ".comments[] | select(.body | contains(\"$COMMENT\"))")
+          if [ -z "$EXISTING_COMMENT" ]; then
+            gh pr comment $PR_NUMBER --body "$COMMENT"
+          fi
+      
+      - name: Fail the check if CLA is missing
+        if: env.CLA_SIGNED == 'false' || env.CLA_VALID == 'false'
+        run: |
+          echo "Contributor has not signed the CLA or their signature is invalid."
+          exit 1
