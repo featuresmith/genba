@@ -8,20 +8,20 @@ jobs:
   update-codeowners:
     runs-on: ubuntu-latest
     permissions:
-        contents: write
+      contents: write
     name: Update CODEOWNERS
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4.2.2
         with:
-            repository: ${{ github.event.pull_request.head.repo.full_name }}
-            ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Update CODEOWNERS file
         uses: gmolau/codeowners@v0.1.5
       - name: Commit CODEOWNERS file
         env:
-            PR_BRANCH: ${{ github.event.pull_request.head.ref }}
-            GH_TOKEN: ${{ github.token }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           gh api --method PUT /repos/:owner/:repo/contents/.github/CODEOWNERS \
