@@ -18,7 +18,7 @@ jobs:
       - name: Detect merge queue
         run: |
           if [[ "${{ github.event_name }}" == "merge_group" ]]; then
-            echo "This PR is part of a merge group. Skipping CLA check."
+            echo "::notice title=CLA Check::Skipping CLA check as this PR is in a merge group."
             exit 0
           fi
       
