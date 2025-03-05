@@ -6,8 +6,6 @@ on:
       - synchronize
       - reopened
       - edited
-permissions:
-  contents: write
 jobs:
   check-cla:
     runs-on: ubuntu-latest
