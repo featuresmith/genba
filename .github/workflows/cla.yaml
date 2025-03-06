@@ -18,16 +18,13 @@ jobs:
     steps:
       
       - name: Checkout repository
-        if: env.SKIP != 'true'
         uses: actions/checkout@v4.2.2
       
       - name: Get contributor's username
-        if: env.SKIP != 'true'
         id: pr-author
         run: echo "AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
       
       - name: Check if contributor has signed the CLA
-        if: env.SKIP != 'true'
         run: |
           if [ ! -f "contributors/${AUTHOR}.md" ]; then
             echo "CLA_SIGNED=false" >> $GITHUB_ENV
@@ -36,7 +33,7 @@ jobs:
           fi
       
       - name: Validate CLA signature format
-        if: env.SKIP != 'true' && env.CLA_SIGNED == 'true'
+        if: env.CLA_SIGNED == 'true'
         id: validate-cla
         run: |
           SIGNATURE="contributors/${AUTHOR}.md"
@@ -55,7 +52,7 @@ jobs:
           fi
       
       - name: Comment with instructions to sign the CLA
-        if: env.SKIP != 'true' && env.CLA_SIGNED == 'false'
+        if: env.CLA_SIGNED == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -68,7 +65,7 @@ jobs:
           fi
       
       - name: Comment if signature is invalid
-        if: env.SKIP != 'true' && env.CLA_VALID == 'false'
+        if: env.CLA_VALID == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -80,7 +77,7 @@ jobs:
           fi
       
       - name: Fail the check if CLA is missing
-        if: env.SKIP != 'true' && env.CLA_SIGNED == 'false' || env.CLA_VALID == 'false'
+        if: env.CLA_SIGNED == 'false' || env.CLA_VALID == 'false'
         run: |
           echo "Contributor has not signed the CLA or their signature is invalid."
           exit 1
