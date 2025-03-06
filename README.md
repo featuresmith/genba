@@ -1,6 +1,6 @@
 # Genba
 
-This project is an experiment in software development velocity!
+This project is an experiment in software development velocity.
 
 # Contributing
 
