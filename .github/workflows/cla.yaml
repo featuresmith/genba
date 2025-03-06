@@ -14,13 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+    if: always() && github.event_name != 'merge_group'
     steps:
-      - name: Detect merge queue
-        run: |
-          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
-            echo "Skipping CLA check as this PR is in a merge group."
-            echo "SKIP=true" >> $GITHUB_ENV
-          fi
       
       - name: Checkout repository
         if: env.SKIP != 'true'
@@ -95,14 +90,8 @@ jobs:
     permissions:
       contents: write
     needs: check-cla
+    if: always() && github.event_name != 'merge_group'
     steps:
-      - name: Detect merge queue
-        run: |
-          if [[ "${{ github.event_name }}" == "merge_group" ]]; then
-            echo "This PR is already part of a merge group."
-            exit 0
-          fi
-      
       - uses: alexwilson/enable-github-automerge-action@main
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
